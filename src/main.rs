@@ -46,7 +46,10 @@ async fn main() {
                     .get(format!("https://crates.io/api/v1/crates/{}", name))
                     .send()
                     .await?;
-                resp.json::<ApiResponse>().await
+                match resp.error_for_status() {
+                    Ok(resp) => resp.json::<ApiResponse>().await,
+                    Err(err) => Err(err),
+                }
             }
         })
         .buffer_unordered(2);
